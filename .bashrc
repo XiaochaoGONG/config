@@ -119,6 +119,11 @@ fi
 export PATH=$PATH:~/code/llvm/build/bin
 export PATH="$PATH:$HOME/code/esp/xtensa-esp32-elf/bin"
 export IDF_PATH="$HOME/code/esp/esp-idf"
+export OPENOCD_PATH="/home/gongxiaochao/code/esp/openocd-esp32"
 
 # added by Anaconda3 installer
 export PATH="/home/gongxiaochao/anaconda3/bin:$PATH"
+
+export PATH="/home/gongxiaochao/Downloads/pycharm-community-2018.2.1/bin:$PATH"
+export PATH="/home/gongxiaochao/code/esp/openocd-esp32/bin:$PATH"
+zsh
