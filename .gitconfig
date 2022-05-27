@@ -4,13 +4,22 @@
 [alias]
 	st = status
 	br = branch
-	ch = checkout
+    ch = checkout
+    co = commit
     lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
 [core]
 	editor = vim
 	pager = less -F -X
-[filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+[diff]
+	tool = bc4
+[difftool]
+	prompt = true
+[difftool "bc4"]
+	cmd = \"/usr/bin/bcompare\" \"$LOCAL\" \"$REMOTE\"
+[merge]
+	tool = bc4
+[mergetool]
+	prompt = false
+[mergetool "bc4"]
+	cmd = \"/usr/bin/bcompare\" \"$LOCAL\" \"$REMOTE\" \"$BASE\" \"$MERGED\"
+	trustexitcode = true
