@@ -24,9 +24,6 @@ Plug 'joereynolds/gtags-scope'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'skywind3000/gutentags_plus'
 
-" Vim buffer helper
-Plug 'jlanzarotta/bufexplorer'
-
 " Show a diff using Vim its sign column
 Plug 'mhinz/vim-signify'
 
@@ -86,11 +83,6 @@ noremap <ESC>9 :tabnext 9<CR>
 noremap <ESC>0 :tablast<CR>
 set ttimeout ttimeoutlen=100
 
-
-"设置taglist打开关闭的快捷键F8
-noremap <F8> :TagbarToggle<CR>
-let Tlist_Show_One_File=1
-let Tlist_Exit_OnlyWindow=1
 
 " 自动补全配置
 set completeopt=longest,menu    "让Vim的补全菜单行为与一般IDE一致(参考VimTip1228)
@@ -153,12 +145,7 @@ let g:cpp_class_scope_highlight = 1
 let g:cpp_member_variable_highlight = 1
 let g:cpp_experimental_simple_template_highlight = 1
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" BufExplorer start
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:bufExplorerDisableDefaultKeyMapping = 1
 " Buffer key bind
-noremap <F4> :ToggleBufExplorer<CR>
 noremap <C-l> :bn<CR>
 noremap <C-h> :bp<CR>
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -212,26 +199,13 @@ let s:ctags_version = system('ctags --version')[0:8]
 if s:ctags_version == "Universal"
   let g:gutentags_ctags_extra_args += ['--extras=+q', '--output-format=e-ctags']
 endif
-let g:gutentags_ctags_exclude = ['build', 'bazel-*', '*.git', '*.svg', 'dist',
+let g:gutentags_ctags_exclude = ['build', 'bazel-cmodel', '*.git', '*.svg', 'dist',
       \ 'tmp', 'doc',
       \ '*.so', '*.zip', '*.pdf', '*.doc', '*.db']
 
 
 " 禁用 gutentags 自动加载 gtags 数据库的行为
 " let g:gutentags_auto_add_gtags_cscope = 1
-
-" remap key bind
-let g:gutentags_plus_nomap = 1
-noremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
-noremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
-noremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
-noremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
-noremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
-noremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
-noremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
-noremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
-noremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
-noremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>
 
 " Change focus to quickfix window after search (optional).
 let g:gutentags_plus_switch = 1
@@ -249,7 +223,8 @@ let g:gutentags_trace = 0
 let g:Lf_ShortcutF = '<C-p>'
 let g:Lf_ShortcutB = '<ESC>n'
 let g:Lf_WindowPosition = 'popup'
-" let g:Lf_PreviewInPopup = 1
+let g:Lf_PreviewInPopup = 1
+let g:Lf_PopupPreviewPosition = 'bottom'
 let g:Lf_WildIgnore = {
       \ 'dir': ['.git', '.svn', 'build', 'bazel-cmodel'],
       \ 'file': ['*.so', '~$*', '*.o'],
@@ -266,6 +241,7 @@ let g:Lf_GtagsSkipUnreadable = 1
 noremap <silent> <F12> <Plug>LeaderfGtagsDefinition
 noremap <silent> <F11> <Plug>LeaderfGtagsReference
 noremap <silent> <F10> <Plug>LeaderfGtagsGrep
+noremap <silent> <F9> <Plug>LeaderfGtagsSymbol
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Leaderf config end
@@ -279,14 +255,59 @@ call quickui#menu#reset()
 
 " Install a 'File' menu
 " call quickui#menu#install(section, items [, weight [, filetypes]])
-call quickui#menu#install('&File', [
-      \ ["&New File\tCtrl+n", "echo 0" ],
+call quickui#menu#install("&File", [
+      \ [ "&New File\t(:tabn)", "tabnew" ],
+      \ [ "--", "" ],
+      \ [ "LeaderF &File\t(Ctrl+p)", "Leaderf file", "Open file with leaderf"],
+      \ [ "LeaderF &Mru", "Leaderf mru --regexMode", "Open recently accessed files"],
+      \ [ "LeaderF &Buffer\t(Alt+n)", "Leaderf buffer", "List current buffers"],
+      \ [ "--", "" ],
+      \ [ "Toggle File &Tree\t<F2>", "NERDTreeToggle", "Toggle nerd tree"],
+      \ [ "--", "" ],
+      \ [ "&Save && Close\t(:wq)", "wq" ],
+      \ [ "&Close\t(:q)", "q" ],
+      \ [ "E&xit\t(:qall)", "qa" ],
       \ ])
-
+call quickui#menu#install("&Symbol", [
+      \ [ "GscopeFind &Definition\t(<leader>cg)", "call feedkeys('\\cg')",
+      \   "GNU Global search g under cursor"],
+      \ [ "GscopeFind &Symbol\t(<leader>cs)", "call feedkeys('\\cs')",
+      \   "Find symbol(reference) under cursor"],
+      \ [ "GscopeFind &Called by\t(<leader>cd)", "call feedkeys('\\cd')",
+      \   "Functions called by this function"],
+      \ [ "GscopeFind C&alling\t(<leader>cc)", "call feedkeys('\\cc')",
+      \   "Functions calling this function"],
+      \ [ "GscopeFind &TextString\t(<leader>ct)", "call feedkeys('\\ct')",
+      \   "Find text string under cursor"],
+      \ [ "GscopeFind &Egreppattern\t(<leader>ce)", "call feedkeys('\\ce')",
+      \   "Find egrep pattern under cursor"],
+      \ ])
+call quickui#menu#install("&Git", [
+      \ [ "Git &Status\t(Fugitive)", "Git" ],
+      \ [ "Git &Log\t(Fugitive)", "Git log" ],
+      \ [ "Git &Branch\t(Fugitive)", "Git br -v" ],
+      \ [ "Git Bla&me\t(Fugitive)", "Git blame" ],
+      \ ])
+call quickui#menu#install('&Tools', [
+      \ [ "List &Buffer", "call quickui#tools#list_buffer('FileSwitch tabe')", ],
+      \ [ "List &Function", "call quickui#tools#list_function()", ],
+      \ [ "Display &Messages", "call quickui#tools#display_messages()", ],
+      \ ])
 " enable to display tips in the cmdline
 let g:quickui_show_tip = 1
 
-noremap <space><space> :call quickui#menu#open()
+nnoremap <space><space> :call quickui#menu#open()<CR>
+
+nnoremap <F4> :call quickui#tools#preview_tag('')<CR>
+au FileType qf noremap <silent><buffer> p :call quickui#tools#preview_quickfix()<cr>
+
+let g:opts = {'title': "Terminal"}
+noremap <C-S-T> :call quickui#terminal#open('zsh', g:opts)<CR>
+
+let g:quickui_color_scheme = 'solarized'
+let g:quickui_preview_w = 100
+let g:quickui_preview_h = 15
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " quickui config end
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
